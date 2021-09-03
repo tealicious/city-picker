@@ -5,12 +5,21 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { getCountries, getStates, getCities } from './ts/services';
 import HelloWorld from './components/HelloWorld.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
     HelloWorld,
+  },
+  async mounted() {
+    const countries = await getCountries;
+    const states = await getStates('United States');
+    const cities = await getCities('Ohio');
+    console.log(countries);
+    console.log(states);
+    console.log(cities);
   },
 });
 </script>
