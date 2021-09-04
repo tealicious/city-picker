@@ -1,21 +1,8 @@
 import axios from 'axios';
+import { Country, State, City } from '@/types';
 
 const emailAddress = process.env.VUE_APP_USER_EMAIL;
 const token = process.env.VUE_APP_USER_TOKEN;
-
-interface Country{
-    'country_name': string,
-    'country_short_name': string,
-    'country_phone_code': number
-}
-
-interface State{
-  'state_name': string
-}
-
-interface City{
-  'city_name': string
-}
 
 export const fetchAuthToken = axios
   .get('https://www.universal-tutorial.com/api/getaccesstoken', {
