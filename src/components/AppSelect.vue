@@ -1,8 +1,13 @@
 <template>
   <div class="input-group">
     <label :for="name" v-if="label">{{ label }}</label>
-    <select v-model="internalValue" :name="name" :id="name" :disabled="disabled">
-      <option disabled selected value="">{{message}}</option>
+    <select
+      v-model="internalValue"
+      :name="name"
+      :id="name"
+      :disabled="disabled"
+    >
+      <option disabled selected value="">{{ message }}</option>
       <option v-for="(option, i) in options" :key="i" :value="option">
         {{ option }}
       </option>
@@ -21,11 +26,11 @@ export default defineComponent({
     },
     options: {
       type: Array as () => string[],
-      default: undefined,
+      default: () => [],
     },
     name: {
       type: String,
-      required: true,
+      required: false,
     },
     label: {
       type: String,
@@ -52,10 +57,25 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .input-group {
-  display: inline-flex;
-  flex-flow: column nowrap;
-  align-items: flex-start;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  label {
+    display: inline-block;
+    font-weight: bold;
+    padding-bottom: 0.5rem;
+  }
+  &:not(:last-child) {
+    margin-bottom: 2rem;
+  }
+  select {
+    border: 1px solid #cecece;
+    background-color: #fff;
+    display:block;
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 0.5em;
+  }
 }
 </style>

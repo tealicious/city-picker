@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2>Selected Country: {{ selectedCountry }}</h2>
     <app-select
+      class="country-picker"
       :options="countryOptions"
       v-model="selectedCountry"
       :disabled="!allowCountrySelect"
@@ -9,8 +9,8 @@
       :label="countrySelectLabel"
     />
 
-    <h3>Selected State: {{ selectedState }}</h3>
     <app-select
+      class="state-picker"
       :options="stateOptions"
       v-model="selectedState"
       :disabled="!allowStateSelect"
@@ -19,8 +19,8 @@
       :message="stateSelectMessage"
     />
 
-    <h3>Selected Cities: {{ selectedcity }}</h3>
     <app-select
+      class="city-picker"
       :options="cityOptions"
       v-model="selectedcity"
       :disabled="!allowCitySelect"
@@ -133,7 +133,7 @@ export default defineComponent({
       let selectCityLabel;
       if (!this.fetchingCities) {
         if (!this.cityOptions.length && this.selectedState !== '') {
-          selectCityLabel = 'There selected state contains no cities. Please select another state.';
+          selectCityLabel = 'The selected state contains no cities. Please select another state.';
         } else {
           selectCityLabel = 'Select a city';
         }
@@ -143,7 +143,7 @@ export default defineComponent({
       return selectCityLabel;
     },
     citySelectMessage(): string {
-      return this.selectedCountry
+      return this.selectedState
         ? 'Please Choose an Option'
         : 'Please select a state first';
     },
@@ -155,15 +155,41 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@mixin tablet-up {
+  @media (min-width: 769px) {
+    @content;
+  }
+}
+:root {
+  * {
+    box-sizing: border-box;
+  }
+}
 body {
-  max-width: 600px;
+  max-width: 800px;
   margin: auto;
-  padding: 0 2rem;
+  padding: 2rem 2rem 0;
+
+  @include tablet-up {
+    padding-top:6rem;
+  }
   height: 100%;
+  font-family: "Roboto Mono", monospace;
+  background-color: #f7f7f7;
 }
 #app > div {
   display: flex;
-  flex-flow: column wrap;
-  align-items: flex-start;
+  flex-flow: row wrap;
+  margin: 0 -1rem;
+}
+.input-group {
+  flex: 0 1 100%;
+  max-width: 100%;
+  @include tablet-up {
+    &:not(.city-picker) {
+      flex: 0 1 50%;
+      max-width: 50%;
+    }
+  }
 }
 </style>
