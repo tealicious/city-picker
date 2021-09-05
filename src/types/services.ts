@@ -11,3 +11,7 @@ export interface State{
 export interface City{
   'city_name': string
 }
+
+export interface ErrorObj {
+  isError: boolean, err: any
+}

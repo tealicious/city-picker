@@ -57,25 +57,28 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .input-group {
   padding-left: 1rem;
   padding-right: 1rem;
+  margin-bottom: 2rem;
   label {
     display: inline-block;
     font-weight: bold;
     padding-bottom: 0.5rem;
   }
-  &:not(:last-child) {
-    margin-bottom: 2rem;
-  }
   select {
     border: 1px solid #cecece;
     background-color: #fff;
-    display:block;
+    display: block;
     width: 100%;
     height: 2.25rem;
     padding: 0 0.5em;
+    font-size: 16px;
+    &:disabled {
+     //match the bg color of the multi-select component when disabled
+     background-color: var(--ms-bg-disabled,#f3f4f6);
+    }
   }
 }
 </style>

@@ -1,48 +1,100 @@
 <template>
   <div>
-    <app-select
-      class="country-picker"
-      :options="countryOptions"
-      v-model="selectedCountry"
-      :disabled="!allowCountrySelect"
-      name="countrySelect"
-      :label="countrySelectLabel"
-    />
+    <h1>City Picker</h1>
+    <p class="intro">
+      Select a country, then state to start picking cities you find there!
+    </p>
+    <h2>
+      {{ selectedCities.length }}
+      {{ selectedCities.length === 1 ? "city" : "cities" }} selected
+    </h2>
+    <div class="flex-wrapper">
+      <app-select
+        class="country-picker"
+        :class="[
+          { fetching: fetchingCountries },
+          { 'has-options': !fetchingCountries && countryOptions.length > 0 },
+        ]"
+        :options="countryOptions"
+        v-model="selectedCountry"
+        :disabled="!allowCountrySelect"
+        name="countrySelect"
+        :label="countrySelectLabel"
+      />
 
-    <app-select
-      class="state-picker"
-      :options="stateOptions"
-      v-model="selectedState"
-      :disabled="!allowStateSelect"
-      name="stateSelect"
-      :label="stateSelectLabel"
-      :message="stateSelectMessage"
-    />
+      <app-select
+        class="state-picker"
+        :class="[
+          { fetching: fetchingStates },
+          { 'has-options': !fetchingStates && stateOptions.length > 0 },
+          {
+            'has-no-options':
+              selectedCountry && !fetchingStates && !stateOptions.length,
+          },
+        ]"
+        :options="stateOptions"
+        v-model="selectedState"
+        :disabled="!allowStateSelect"
+        name="stateSelect"
+        :label="stateSelectLabel"
+        :message="stateSelectMessage"
+      />
 
-    <app-select
-      class="city-picker"
-      :options="cityOptions"
-      v-model="selectedcity"
-      :disabled="!allowCitySelect"
-      name="citySelect"
-      :label="citySelectLabel"
-      :message="citySelectMessage"
-    />
+      <div
+        class="input-group city-picker"
+        :class="[
+          { fetching: fetchingCities },
+          { 'has-options': !fetchingCities && cityOptions.length > 0 },
+          {
+            'has-no-options':
+              selectedState && !fetchingCities && !cityOptions.length,
+          },
+        ]"
+      >
+        <label for="citySelect">{{ citySelectLabel }}</label>
+        <Multiselect
+          id="citySelect"
+          name="citySelect"
+          v-model="selectedCities"
+          :disabled="!allowCitySelect"
+          mode="tags"
+          noResultsText="You picked 'em all!"
+          :placeholder="citySelectMessage"
+          :canClear="false"
+          :closeOnSelect="false"
+          :searchable="false"
+          :createTag="true"
+          :options="cityOptions"
+        />
+      </div>
+
+      <button @click="reset" >Select All Cities</button>
+      <button @click="reset" >Clear</button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import Multiselect from '@vueform/multiselect';
+import AppSelect from './components/AppSelect.vue';
+
 import { getCountries, getStates, getCities } from './ts/services';
+
 import {
   countryOptionsFactory,
   stateOptionsFactory,
   cityOptionsFactory,
 } from './ts/utils';
-import AppSelect from './components/AppSelect.vue';
+
+import { Option } from '@/types';
 
 export default defineComponent({
   name: 'App',
+  components: {
+    AppSelect,
+    Multiselect,
+  },
   data() {
     return {
       fetchingCountries: true,
@@ -52,12 +104,9 @@ export default defineComponent({
       stateOptions: [] as string[],
       selectedState: '',
       fetchingCities: false,
-      cityOptions: [] as string[],
-      selectedcity: '',
+      cityOptions: [] as Option[],
+      selectedCities: [] as string[],
     };
-  },
-  components: {
-    AppSelect,
   },
   watch: {
     selectedCountry(newVal: string) {
@@ -72,17 +121,22 @@ export default defineComponent({
     },
   },
   methods: {
+    reset(): void {
+      this.selectedCountry = '';
+      this.fetchingStates = false;
+      this.stateOptions = [];
+      this.selectedState = '';
+      this.fetchingCities = false;
+      this.cityOptions = [];
+      this.selectedCities = [];
+    },
     resetStatesState(): void {
       this.selectedState = '';
       this.stateOptions = [];
     },
     resetCitiesState(): void {
-      this.selectedcity = '';
+      this.selectedCities = [];
       this.cityOptions = [];
-    },
-    resetAllState(): void {
-      this.resetStatesState();
-      this.resetCitiesState();
     },
     async fetchCountryOptions(): Promise<void> {
       const countries = await getCountries;
@@ -90,7 +144,8 @@ export default defineComponent({
       this.fetchingCountries = false;
     },
     async fetchStateOptions(country: string): Promise<void> {
-      this.resetAllState();
+      this.resetStatesState();
+      this.resetCitiesState();
       this.fetchingStates = true;
       const states = await getStates(country);
       this.stateOptions = stateOptionsFactory(states);
@@ -117,9 +172,17 @@ export default defineComponent({
       return this.selectedCountry !== '' && this.stateOptions.length > 0;
     },
     stateSelectLabel(): string {
-      return !this.fetchingStates
-        ? 'Select a state'
-        : 'Fetching state options...';
+      let stateSelectLabel;
+      if (!this.fetchingStates) {
+        if (!this.stateOptions.length && this.selectedCountry !== '') {
+          stateSelectLabel = 'The selected country contains no states. Please select another country.';
+        } else {
+          stateSelectLabel = 'Select a state';
+        }
+      } else {
+        stateSelectLabel = 'Fetching state options...';
+      }
+      return stateSelectLabel;
     },
     stateSelectMessage(): string {
       return this.selectedCountry
@@ -134,8 +197,10 @@ export default defineComponent({
       if (!this.fetchingCities) {
         if (!this.cityOptions.length && this.selectedState !== '') {
           selectCityLabel = 'The selected state contains no cities. Please select another state.';
-        } else {
+        } else if (this.cityOptions.length === 1) {
           selectCityLabel = 'Select a city';
+        } else {
+          selectCityLabel = 'Select cities';
         }
       } else {
         selectCityLabel = 'Fetching city options...';
@@ -154,42 +219,124 @@ export default defineComponent({
 });
 </script>
 
+<style src="@vueform/multiselect/themes/default.css"></style>
 <style lang="scss">
 @mixin tablet-up {
   @media (min-width: 769px) {
     @content;
   }
 }
+
 :root {
   * {
     box-sizing: border-box;
   }
 }
+
+$color-text: rgb(31, 31, 31);
+
 body {
   max-width: 800px;
   margin: auto;
   padding: 2rem 2rem 0;
-
-  @include tablet-up {
-    padding-top:6rem;
-  }
   height: 100%;
   font-family: "Roboto Mono", monospace;
+  color: $color-text;
+  * {
+    font-family: inherit;
+  }
   background-color: #f7f7f7;
+  --ms-max-height: 50vh;
+  --ms-placeholder-color: $color-text;
+  @include tablet-up {
+    padding-top: 6rem;
+    --ms-max-height: calc(100vh - 500px);
+  }
 }
-#app > div {
+
+h1,
+h2 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+.intro {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.flex-wrapper {
   display: flex;
   flex-flow: row wrap;
   margin: 0 -1rem;
+  justify-content: center;
 }
+
+$red: #d2322d;
+$blue: #3a87ad;
+
 .input-group {
   flex: 0 1 100%;
   max-width: 100%;
+  &.fetching {
+    label {
+      color: #468847;
+    }
+  }
+  &.has-options {
+    label {
+      color: $blue;
+    }
+  }
+  &.has-no-options {
+    label {
+      color: $red;
+    }
+  }
   @include tablet-up {
     &:not(.city-picker) {
       flex: 0 1 50%;
       max-width: 50%;
     }
+  }
+}
+
+.multiselect-dropdown {
+  max-height: var(--ms-max-height, 10rem);
+  border-radius: 0;
+  border: 1px solid #cecece; // override to match native select styles
+  &.is-active {
+    box-shadow: none;
+  }
+}
+
+.multiselect.is-active,
+select:focus,
+select:active {
+  box-shadow: none;
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+.multiselect.is-disabled {
+  color: rgb(170, 170, 170);
+}
+
+button {
+  padding: .5em 2em;
+  text-transform: uppercase;
+  color: white;
+  background-color: $blue;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top:2rem;
+  &:hover,
+  &:active,
+  &focus {
+    background-color: lighten($blue, 20%);
   }
 }
 </style>
