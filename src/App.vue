@@ -2,7 +2,7 @@
   <div>
     <h1>City Picker</h1>
     <p class="intro">
-      Select a country, then state to start picking cities you find there!
+      Select a country and a state to start picking cities you find there!
     </p>
     <h2>
       {{ selectedCities.length }}
@@ -68,8 +68,12 @@
         />
       </div>
 
-      <button @click="reset" >Select All Cities</button>
-      <button @click="reset" >Clear</button>
+      <button @click="selectAllCities" :disabled="!cityOptions.length">
+        Select All Cities
+      </button>
+      <button @click="reset" class="reset" :disabled="!stateOptions.length">
+        Reset All Options
+      </button>
     </div>
   </div>
 </template>
@@ -121,6 +125,11 @@ export default defineComponent({
     },
   },
   methods: {
+    selectAllCities(): void {
+      this.selectedCities = this.cityOptions.map(
+        (cityOption) => cityOption.value,
+      );
+    },
     reset(): void {
       this.selectedCountry = '';
       this.fetchingStates = false;
@@ -238,7 +247,7 @@ $color-text: rgb(31, 31, 31);
 body {
   max-width: 800px;
   margin: auto;
-  padding: 2rem 2rem 0;
+  padding: 2rem;
   height: 100%;
   font-family: "Roboto Mono", monospace;
   color: $color-text;
@@ -273,8 +282,10 @@ h2 {
   justify-content: center;
 }
 
+$color-disabled: rgb(170, 170, 170);
 $red: #d2322d;
 $blue: #3a87ad;
+$yellow: #c09853;
 
 .input-group {
   flex: 0 1 100%;
@@ -320,11 +331,11 @@ select:active {
 }
 
 .multiselect.is-disabled {
-  color: rgb(170, 170, 170);
+  color: $color-disabled;
 }
 
 button {
-  padding: .5em 2em;
+  padding: 0.5em 2em;
   text-transform: uppercase;
   color: white;
   background-color: $blue;
@@ -332,11 +343,25 @@ button {
   border: none;
   cursor: pointer;
   font-weight: bold;
-  margin-top:2rem;
+  margin: 2rem 1rem 0;
   &:hover,
   &:active,
-  &focus {
+  &:focus {
     background-color: lighten($blue, 20%);
+  }
+  &.reset {
+    background-color: $yellow;
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: lighten($yellow, 20%);
+    }
+  }
+  &:disabled {
+    cursor: default;
+    background-color: var(--ms-bg-disabled, #f3f4f6);
+    border: var(--ms-border-width, 1px) solid var(--ms-border-color, #d1d5db);
+    color: $color-disabled;
   }
 }
 </style>
