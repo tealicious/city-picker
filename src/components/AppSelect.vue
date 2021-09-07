@@ -1,7 +1,23 @@
 <template>
   <div class="input-group">
     <label :for="name" v-if="label">{{ label }}</label>
+    <Multiselect
+      v-if="multi"
+      :name="name"
+      :id="name"
+      v-model="internalValue"
+      :disabled="disabled"
+      mode="tags"
+      noResultsText="You picked 'em all!"
+      :placeholder="message"
+      :canClear="false"
+      :closeOnSelect="false"
+      :searchable="false"
+      :createTag="true"
+      :options="options"
+    />
     <select
+      v-else
       v-model="internalValue"
       :name="name"
       :id="name"
@@ -16,16 +32,21 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import Multiselect from '@vueform/multiselect';
+import { Option } from '@/types';
 
 export default defineComponent({
   name: 'AppSelect',
+  components: {
+    Multiselect,
+  },
   props: {
     modelValue: {
-      type: String,
+      type: [String as () => string, Array as () => string[]],
       default: '',
     },
     options: {
-      type: Array as () => string[],
+      type: Array as () => string[]|Option[],
       default: () => [],
     },
     name: {
@@ -44,24 +65,49 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    multi: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     internalValue: {
-      get(): string {
+      get(): string|string[] {
         return this.modelValue;
       },
-      set(newVal: string): void {
+      set(newVal: string|string[]): void {
         this.$emit('update:modelValue', newVal);
       },
     },
   },
 });
 </script>
+<style src="@vueform/multiselect/themes/default.css"></style>
 <style lang="scss">
+$color-disabled: rgb(170, 170, 170);
+$red: #d2322d;
+$blue: #3a87ad;
+$yellow: #c09853;
+
 .input-group {
   padding-left: 1rem;
   padding-right: 1rem;
   margin-bottom: 2rem;
+  &.fetching {
+    label {
+      color: #468847;
+    }
+  }
+  &.has-options {
+    label {
+      color: $blue;
+    }
+  }
+  &.has-no-options {
+    label {
+      color: $red;
+    }
+  }
   label {
     display: inline-block;
     font-weight: bold;
@@ -72,13 +118,36 @@ export default defineComponent({
     background-color: #fff;
     display: block;
     width: 100%;
-    height: 2.25rem;
+    height: 40px;
     padding: 0 0.5em;
     font-size: 16px;
     &:disabled {
-     //match the bg color of the multi-select component when disabled
-     background-color: var(--ms-bg-disabled,#f3f4f6);
+      //match the bg color of the multi-select component when disabled
+      background-color: var(--ms-bg-disabled, #f3f4f6);
     }
   }
+}
+
+.multiselect, .multiselect-dropdown {
+  border-radius: 0;
+}
+.multiselect-dropdown {
+  max-height: var(--ms-max-height, 10rem);
+  border: 1px solid #cecece; // override to match native select styles
+  &.is-active {
+    box-shadow: none;
+  }
+}
+
+.multiselect.is-active,
+select:focus,
+select:active {
+  box-shadow: none;
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+.multiselect.is-disabled {
+  color: $color-disabled;
 }
 </style>
