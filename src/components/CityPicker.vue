@@ -10,7 +10,7 @@
       :options="countryOptions"
       v-model="selectedCountry"
       :disabled="!allowCountrySelect"
-      name="countrySelect"
+      :name="countryPickerID"
     >
       <template v-slot:label>
         {{ countrySelectLabel }}
@@ -30,16 +30,18 @@
       :options="stateOptions"
       v-model="selectedState"
       :disabled="!allowStateSelect"
-      name="stateSelect"
+      :name="statePickerID"
       :message="stateSelectMessage"
     >
       <template v-slot:label>
-        <a href="javascript:void(0)"
-        class="back-step"
-        @click.prevent="reset"
-        v-if="stepThroughMode && !fetchingStates">
-        &#8592; Countries
-        </a>{{ stateSelectLabel }}
+        <a
+          href="javascript:void(0)"
+          class="back-step"
+          @click.prevent="reset"
+          v-if="stepThroughMode && !fetchingStates"
+        >
+          Countries ></a
+        >{{ stateSelectLabel }}
       </template>
     </app-select>
 
@@ -56,17 +58,31 @@
       :options="cityOptions"
       v-model="selectedCities"
       :disabled="!allowCitySelect"
-      name="citySelect"
+      :name="cityPickerID"
       :message="citySelectMessage"
       multi
     >
       <template v-slot:label>
-        <a href="javascript:void(0)"
-        class="back-step"
-        @click.prevent="selectedState = ''"
-        v-if="stepThroughMode && !fetchingCities">
-        &#8592; States
-        </a>{{ citySelectLabel }}
+        <a
+          href="javascript:void(0)"
+          class="back-step"
+          @click.prevent="reset"
+          v-if="stepThroughMode && !fetchingStates"
+        >
+          Countries ></a
+        >
+        <a
+          href="javascript:void(0)"
+          class="back-step"
+          @click.prevent="
+            () => {
+              selectedState = '';
+              clearAllCities();
+            }
+          "
+          v-if="stepThroughMode && !fetchingCities"
+        >States ></a
+        >{{ citySelectLabel }}
       </template>
     </app-select>
 
@@ -93,9 +109,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppSelect from '@/components/AppSelect.vue';
+
 import { getCountries, getStates, getCities } from '@/ts/services';
 
-import { countryOptionsFactory, stateOptionsFactory, cityOptionsFactory } from '@/ts/utils';
+import {
+  countryOptionsFactory, stateOptionsFactory, cityOptionsFactory, uuidv4,
+} from '@/ts/utils';
 
 import { Option, ErrorObj, Country } from '@/types';
 
@@ -123,6 +142,9 @@ export default defineComponent({
       cityOptions: [] as Option[],
       selectedCities: [] as string[],
       stepThroughMode: this.mode === 'step-through',
+      countryPickerID: `${uuidv4()}_country_picker`,
+      statePickerID: `${uuidv4()}_state_picker`,
+      cityPickerID: `${uuidv4()}_city_picker`,
     };
   },
   watch: {
@@ -203,7 +225,7 @@ export default defineComponent({
       let stateSelectLabel;
       if (!this.fetchingStates) {
         if (!this.stateOptions.length && this.selectedCountry !== '') {
-          stateSelectLabel = 'The selected country contains no states. Please select another country.';
+          stateSelectLabel = `${this.selectedCountry} contains no states. Please select another country.`;
         } else {
           stateSelectLabel = 'Select a state';
         }
@@ -213,7 +235,9 @@ export default defineComponent({
       return stateSelectLabel;
     },
     stateSelectMessage(): string {
-      return this.selectedCountry ? 'Please Choose an Option' : 'Please select a country first';
+      return this.selectedCountry
+        ? `${this.selectedCountry}: please choose a state`
+        : 'Please select a country first';
     },
     allowCitySelect(): boolean {
       return this.selectedState !== '' && this.cityOptions.length > 0;
@@ -222,7 +246,7 @@ export default defineComponent({
       let selectCityLabel;
       if (!this.fetchingCities) {
         if (!this.cityOptions.length && this.selectedState !== '') {
-          selectCityLabel = 'The selected state contains no cities. Please select another state.';
+          selectCityLabel = `${this.selectedState} contains no cities. Please select another state.`;
         } else if (this.cityOptions.length === 1) {
           selectCityLabel = 'Select a city';
         } else {
@@ -234,7 +258,9 @@ export default defineComponent({
       return selectCityLabel;
     },
     citySelectMessage(): string {
-      return this.selectedState ? 'Please Choose an Option' : 'Please select a state first';
+      return this.selectedState
+        ? `${this.selectedState}, ${this.selectedCountry}: Please choose your cities`
+        : 'Please select a state first';
     },
   },
   mounted() {
@@ -264,8 +290,8 @@ $yellow: #c09853;
 .input-group {
   flex: 0 1 100%;
   max-width: 100%;
-  .city-pciker {
-    margin:0;
+  &.city-picker {
+    margin: 0;
   }
   @include tablet-up {
     &:not(.city-picker) {
@@ -351,7 +377,12 @@ button {
 
 .back-step {
   color: $yellow;
-  margin-right:.5rem;
+  margin-right: 0.66rem;
   text-decoration: none;
+  &:hover,
+  &:active,
+  &:focus {
+    text-decoration: underline;
+  }
 }
 </style>

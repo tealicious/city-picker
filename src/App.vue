@@ -4,6 +4,7 @@
     <p class="intro">
       Select a country and a state to start picking cities!
     </p>
+    <hr>
     <h2>As Step-Through Drodpdown</h2>
     <h3>
       {{ selectedCitiesCountB }}
@@ -59,6 +60,10 @@ $yellow: #c09853;
 
 $color-text: rgb(31, 31, 31);
 
+html {
+  background-color:white;
+}
+
 body {
   max-width: 800px;
   margin: auto;
@@ -85,12 +90,17 @@ hr {
 h1,
 h2,
 h3 {
-  font-size: 30px;
   font-weight: 700;
   margin-bottom: 2rem;
 }
 h1 {
-  font-size:40px;
+  font-size:45px;
+}
+h2 {
+  font-size: 35px;
+}
+h3 {
+  font-size: 30px;
 }
 .intro {
   font-size: 18px;

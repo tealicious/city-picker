@@ -20,3 +20,11 @@ export function stateOptionsFactory(fetchedStates: State[] | ErrorObj): string[]
   if ((fetchedStates as ErrorObj).isError) return [];
   return (fetchedStates as State[]).map((state) => state.state_name);
 }
+
+export function uuidv4(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0; const
+      v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
