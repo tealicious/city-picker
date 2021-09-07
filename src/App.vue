@@ -4,11 +4,22 @@
     <p class="intro">
       Select a country and a state to start picking cities!
     </p>
-    <h2>
-      {{ selectedCities.length }}
-      {{ selectedCities.length === 1 ? "city" : "cities" }} selected
-    </h2>
-    <CityPicker />
+    <h2>As Step-Through Drodpdown</h2>
+    <h3>
+      {{ selectedCitiesCountB }}
+      {{ selectedCitiesCountB === 1 ? "city" : "cities" }} selected
+    </h3>
+    <CityPicker
+      @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
+      mode="step-through"
+    />
+    <hr />
+    <h2>As Form</h2>
+    <h3>
+      {{ selectedCitiesCountA }}
+      {{ selectedCitiesCountA === 1 ? "city" : "cities" }} selected
+    </h3>
+    <CityPicker @citiesSelected="$val => (selectedCitiesCountA = $val.length)" />
   </div>
 </template>
 
@@ -23,7 +34,8 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedCities: [] as string[],
+      selectedCitiesCountA: 0,
+      selectedCitiesCountB: 0,
     };
   },
 });
@@ -61,16 +73,24 @@ body {
   --ms-max-height: 50vh;
   --ms-placeholder-color: $color-text;
   @include tablet-up {
-    padding-top: 6rem;
+    padding: 4rem 2rem 6rem;
     --ms-max-height: calc(100vh - 500px);
   }
 }
 
+hr {
+  margin: 3rem 0;
+}
+
 h1,
-h2 {
+h2,
+h3 {
   font-size: 30px;
   font-weight: 700;
   margin-bottom: 2rem;
+}
+h1 {
+  font-size:40px;
 }
 .intro {
   font-size: 18px;

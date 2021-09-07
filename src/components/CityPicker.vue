@@ -1,97 +1,114 @@
 <template>
- <div class="flex-wrapper">
-      <app-select
-        class="country-picker"
-        :class="[
-          { fetching: fetchingCountries },
-          { 'has-options': !fetchingCountries && countryOptions.length > 0 },
-        ]"
-        :options="countryOptions"
-        v-model="selectedCountry"
-        :disabled="!allowCountrySelect"
-        name="countrySelect"
-        :label="countrySelectLabel"
-      />
+  <div class="flex-wrapper" :class="`mode-${mode}`">
+    <app-select
+      v-if="!stepThroughMode || !selectedCountry"
+      class="country-picker"
+      :class="[
+        { fetching: fetchingCountries },
+        { 'has-options': !fetchingCountries && countryOptions.length > 0 }
+      ]"
+      :options="countryOptions"
+      v-model="selectedCountry"
+      :disabled="!allowCountrySelect"
+      name="countrySelect"
+    >
+      <template v-slot:label>
+        {{ countrySelectLabel }}
+      </template>
+    </app-select>
 
-      <app-select
-        class="state-picker"
-        :class="[
-          { fetching: fetchingStates },
-          { 'has-options': !fetchingStates && stateOptions.length > 0 },
-          {
-            'has-no-options':
-              selectedCountry && !fetchingStates && !stateOptions.length,
-          },
-        ]"
-        :options="stateOptions"
-        v-model="selectedState"
-        :disabled="!allowStateSelect"
-        name="stateSelect"
-        :label="stateSelectLabel"
-        :message="stateSelectMessage"
-      />
+    <app-select
+      v-if="!stepThroughMode || (!selectedState && selectedCountry)"
+      class="state-picker"
+      :class="[
+        { fetching: fetchingStates },
+        { 'has-options': !fetchingStates && stateOptions.length > 0 },
+        {
+          'has-no-options': selectedCountry && !fetchingStates && !stateOptions.length
+        }
+      ]"
+      :options="stateOptions"
+      v-model="selectedState"
+      :disabled="!allowStateSelect"
+      name="stateSelect"
+      :message="stateSelectMessage"
+    >
+      <template v-slot:label>
+        <a href="javascript:void(0)"
+        class="back-step"
+        @click.prevent="reset"
+        v-if="stepThroughMode && !fetchingStates">
+        &#8592; Countries
+        </a>{{ stateSelectLabel }}
+      </template>
+    </app-select>
 
-      <app-select
-        class="city-picker"
-         :class="[
-          { fetching: fetchingCities },
-          { 'has-options': !fetchingCities && cityOptions.length > 0 },
-          {
-            'has-no-options':
-              selectedState && !fetchingCities && !cityOptions.length,
-          },
-        ]"
-        :options="cityOptions"
-        v-model="selectedCities"
-        :disabled="!allowCitySelect"
-        name="citySelect"
-        :label="citySelectLabel"
-        :message="citySelectMessage"
-        multi
-      />
+    <app-select
+      v-if="!stepThroughMode || (selectedState && selectedCountry)"
+      class="city-picker"
+      :class="[
+        { fetching: fetchingCities },
+        { 'has-options': !fetchingCities && cityOptions.length > 0 },
+        {
+          'has-no-options': selectedState && !fetchingCities && !cityOptions.length
+        }
+      ]"
+      :options="cityOptions"
+      v-model="selectedCities"
+      :disabled="!allowCitySelect"
+      name="citySelect"
+      :message="citySelectMessage"
+      multi
+    >
+      <template v-slot:label>
+        <a href="javascript:void(0)"
+        class="back-step"
+        @click.prevent="selectedState = ''"
+        v-if="stepThroughMode && !fetchingCities">
+        &#8592; States
+        </a>{{ citySelectLabel }}
+      </template>
+    </app-select>
 
-      <div class="flex-wrapper">
-        <button
-          @click="selectAllCities"
-          :disabled="
-            !cityOptions.length || cityOptions.length === selectedCities.length
-          "
-        >
-          Select All Cities
-        </button>
-        <button
+    <div class="flex-wrapper button-wrapper">
+      <button
+        @click="selectAllCities"
+        :disabled="!cityOptions.length || cityOptions.length === selectedCities.length"
+      >
+        Select All Cities
+      </button>
+      <button
         class="clear"
-          @click="clearAllCities"
-          :disabled="
-            !cityOptions.length || selectedCities.length === 0
-          "
-        >
-          Clear All Cities
-        </button>
-        <button @click="reset" class="reset" :disabled="!stateOptions.length">
-          Reset All Options
-        </button>
-      </div>
+        @click="clearAllCities"
+        :disabled="!cityOptions.length || selectedCities.length === 0"
+      >
+        Clear All Cities
+      </button>
+      <button @click="reset" class="reset" :disabled="!stateOptions.length">
+        Reset All Options
+      </button>
     </div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppSelect from '@/components/AppSelect.vue';
 import { getCountries, getStates, getCities } from '@/ts/services';
 
-import {
-  countryOptionsFactory,
-  stateOptionsFactory,
-  cityOptionsFactory,
-} from '@/ts/utils';
+import { countryOptionsFactory, stateOptionsFactory, cityOptionsFactory } from '@/ts/utils';
 
 import { Option, ErrorObj, Country } from '@/types';
 
 export default defineComponent({
   name: 'CityPicker',
   components: {
-
     AppSelect,
+  },
+  props: {
+    mode: {
+      type: String,
+      default: 'form',
+    },
   },
   data() {
     return {
@@ -105,6 +122,7 @@ export default defineComponent({
       fetchingCities: false,
       cityOptions: [] as Option[],
       selectedCities: [] as string[],
+      stepThroughMode: this.mode === 'step-through',
     };
   },
   watch: {
@@ -118,15 +136,16 @@ export default defineComponent({
         this.fetchCityOptions(newVal);
       }
     },
+    selectedCities(newVal: string[]) {
+      this.$emit('citiesSelected', newVal);
+    },
   },
   methods: {
     clearAllCities(): void {
       this.selectedCities = [];
     },
     selectAllCities(): void {
-      this.selectedCities = this.cityOptions.map(
-        (cityOption) => cityOption.value,
-      );
+      this.selectedCities = this.cityOptions.map((cityOption) => cityOption.value);
     },
     reset(): void {
       this.selectedCountry = '';
@@ -175,9 +194,7 @@ export default defineComponent({
       return this.countryOptions.length > 0;
     },
     countrySelectLabel(): string {
-      return !this.fetchingCountries
-        ? 'Select a country'
-        : 'Fetching country options...';
+      return !this.fetchingCountries ? 'Select a country' : 'Fetching country options...';
     },
     allowStateSelect(): boolean {
       return this.selectedCountry !== '' && this.stateOptions.length > 0;
@@ -196,9 +213,7 @@ export default defineComponent({
       return stateSelectLabel;
     },
     stateSelectMessage(): string {
-      return this.selectedCountry
-        ? 'Please Choose an Option'
-        : 'Please select a country first';
+      return this.selectedCountry ? 'Please Choose an Option' : 'Please select a country first';
     },
     allowCitySelect(): boolean {
       return this.selectedState !== '' && this.cityOptions.length > 0;
@@ -219,9 +234,7 @@ export default defineComponent({
       return selectCityLabel;
     },
     citySelectMessage(): string {
-      return this.selectedState
-        ? 'Please Choose an Option'
-        : 'Please select a state first';
+      return this.selectedState ? 'Please Choose an Option' : 'Please select a state first';
     },
   },
   mounted() {
@@ -234,6 +247,7 @@ $color-disabled: rgb(170, 170, 170);
 $red: #d2322d;
 $blue: #3a87ad;
 $yellow: #c09853;
+
 @mixin tablet-up {
   @media (min-width: 769px) {
     @content;
@@ -250,10 +264,21 @@ $yellow: #c09853;
 .input-group {
   flex: 0 1 100%;
   max-width: 100%;
+  .city-pciker {
+    margin:0;
+  }
   @include tablet-up {
     &:not(.city-picker) {
       flex: 0 1 50%;
       max-width: 50%;
+    }
+  }
+  .mode-step-through & {
+    @include tablet-up {
+      &:not(.city-picker) {
+        flex: 0 1 100%;
+        max-width: 100%;
+      }
     }
   }
 }
@@ -300,5 +325,33 @@ button {
       background-color: var(--ms-bg-disabled, #f3f4f6);
     }
   }
+}
+
+.mode-step-through {
+  .button-wrapper {
+    padding: 0 1rem;
+    width: 100%;
+  }
+  .input-group {
+    margin-bottom: 0;
+  }
+  button {
+    margin: 0;
+    flex: 0 1 100%;
+    max-width: 100%;
+    @include tablet-up {
+      flex: 0 1 50%;
+      max-width: 50%;
+    }
+  }
+  button.reset {
+    display: none;
+  }
+}
+
+.back-step {
+  color: $yellow;
+  margin-right:.5rem;
+  text-decoration: none;
 }
 </style>

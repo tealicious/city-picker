@@ -1,6 +1,11 @@
 <template>
   <div class="input-group">
-    <label :for="name" v-if="label">{{ label }}</label>
+    <label :for="name">
+      <span v-if="hasSlotLabel">
+        <slot name="label"></slot>
+      </span>
+      <span v-else>{{ label }}</span>
+    </label>
     <Multiselect
       v-if="multi"
       :name="name"
@@ -12,17 +17,11 @@
       :placeholder="message"
       :canClear="false"
       :closeOnSelect="false"
-      :searchable="false"
+      :searchable="true"
       :createTag="true"
       :options="options"
     />
-    <select
-      v-else
-      v-model="internalValue"
-      :name="name"
-      :id="name"
-      :disabled="disabled"
-    >
+    <select v-else v-model="internalValue" :name="name" :id="name" :disabled="disabled">
       <option disabled selected value="">{{ message }}</option>
       <option v-for="(option, i) in options" :key="i" :value="option">
         {{ option }}
@@ -46,7 +45,7 @@ export default defineComponent({
       default: '',
     },
     options: {
-      type: Array as () => string[]|Option[],
+      type: Array as () => string[] | Option[],
       default: () => [],
     },
     name: {
@@ -72,12 +71,15 @@ export default defineComponent({
   },
   computed: {
     internalValue: {
-      get(): string|string[] {
+      get(): string | string[] {
         return this.modelValue;
       },
-      set(newVal: string|string[]): void {
+      set(newVal: string | string[]): void {
         this.$emit('update:modelValue', newVal);
       },
+    },
+    hasSlotLabel(): boolean {
+      return !!this.$slots.label;
     },
   },
 });
@@ -128,7 +130,8 @@ $yellow: #c09853;
   }
 }
 
-.multiselect, .multiselect-dropdown {
+.multiselect,
+.multiselect-dropdown {
   border-radius: 0;
 }
 .multiselect-dropdown {
