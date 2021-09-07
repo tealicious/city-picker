@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-wrapper" :class="`mode-${mode}`">
+  <div class="flex-wrapper" :class="`layout-${layout}`">
     <app-select
       v-if="!stepThroughMode || !selectedCountry"
       class="country-picker"
@@ -13,7 +13,7 @@
       :name="countryPickerID"
     >
       <template v-slot:label>
-        {{ countrySelectLabel }}
+        {{ countrySelectLabel }}<app-typer v-if="fetchingCountries">...</app-typer>
       </template>
     </app-select>
 
@@ -41,7 +41,7 @@
           v-if="stepThroughMode && !fetchingStates"
         >
           Countries ></a
-        >{{ stateSelectLabel }}
+        >{{ stateSelectLabel }}<app-typer v-if="fetchingStates">...</app-typer>
       </template>
     </app-select>
 
@@ -60,7 +60,9 @@
       :disabled="!allowCitySelect"
       :name="cityPickerID"
       :message="citySelectMessage"
+      :multiSelectedOptionLabel="selectedCities.length === 1 ? 'city' : 'cities'"
       multi
+      :mode="mode"
     >
       <template v-slot:label>
         <a
@@ -81,8 +83,8 @@
             }
           "
           v-if="stepThroughMode && !fetchingCities"
-        >States ></a
-        >{{ citySelectLabel }}
+          >States ></a
+        >{{ citySelectLabel }}<app-typer v-if="fetchingCities">...</app-typer>
       </template>
     </app-select>
 
@@ -109,6 +111,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppSelect from '@/components/AppSelect.vue';
+import AppTyper from '@/components/AppTyper.vue';
 
 import { getCountries, getStates, getCities } from '@/ts/services';
 
@@ -122,11 +125,16 @@ export default defineComponent({
   name: 'CityPicker',
   components: {
     AppSelect,
+    AppTyper,
   },
   props: {
-    mode: {
+    layout: {
       type: String,
       default: 'form',
+    },
+    mode: {
+      type: String,
+      default: 'tags',
     },
   },
   data() {
@@ -141,7 +149,7 @@ export default defineComponent({
       fetchingCities: false,
       cityOptions: [] as Option[],
       selectedCities: [] as string[],
-      stepThroughMode: this.mode === 'step-through',
+      stepThroughMode: this.layout === 'step-through',
       countryPickerID: `${uuidv4()}_country_picker`,
       statePickerID: `${uuidv4()}_state_picker`,
       cityPickerID: `${uuidv4()}_city_picker`,
@@ -196,16 +204,16 @@ export default defineComponent({
       this.fetchingCountries = false;
     },
     async fetchStateOptions(country: string): Promise<void> {
+      this.fetchingStates = true;
       this.resetStatesState();
       this.resetCitiesState();
-      this.fetchingStates = true;
       const states = await getStates(country);
       this.stateOptions = stateOptionsFactory(states);
       this.fetchingStates = false;
     },
     async fetchCityOptions(state: string): Promise<void> {
-      this.resetCitiesState();
       this.fetchingCities = true;
+      this.resetCitiesState();
       const cities = await getCities(state);
       this.cityOptions = cityOptionsFactory(cities);
       this.fetchingCities = false;
@@ -216,7 +224,7 @@ export default defineComponent({
       return this.countryOptions.length > 0;
     },
     countrySelectLabel(): string {
-      return !this.fetchingCountries ? 'Select a country' : 'Fetching country options...';
+      return !this.fetchingCountries ? 'Select a country' : 'Loading countries';
     },
     allowStateSelect(): boolean {
       return this.selectedCountry !== '' && this.stateOptions.length > 0;
@@ -230,7 +238,7 @@ export default defineComponent({
           stateSelectLabel = 'Select a state';
         }
       } else {
-        stateSelectLabel = 'Fetching state options...';
+        stateSelectLabel = 'Loading states';
       }
       return stateSelectLabel;
     },
@@ -253,7 +261,7 @@ export default defineComponent({
           selectCityLabel = 'Select cities';
         }
       } else {
-        selectCityLabel = 'Fetching city options...';
+        selectCityLabel = 'Loading cities';
       }
       return selectCityLabel;
     },
@@ -299,7 +307,7 @@ $yellow: #c09853;
       max-width: 50%;
     }
   }
-  .mode-step-through & {
+  .layout-step-through & {
     @include tablet-up {
       &:not(.city-picker) {
         flex: 0 1 100%;
@@ -353,11 +361,12 @@ button {
   }
 }
 
-.mode-step-through {
-  .button-wrapper {
-    padding: 0 1rem;
-    width: 100%;
-  }
+.button-wrapper {
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.layout-step-through {
   .input-group {
     margin-bottom: 0;
   }

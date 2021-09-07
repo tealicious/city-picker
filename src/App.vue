@@ -4,18 +4,26 @@
     <p class="intro">
       Select a country and a state to start picking cities!
     </p>
-    <hr>
-    <h2>As Step-Through Drodpdown</h2>
+    <hr />
+    <h2>Step-Through Drodpdown A.</h2>
     <h3>
       {{ selectedCitiesCountB }}
       {{ selectedCitiesCountB === 1 ? "city" : "cities" }} selected
     </h3>
     <CityPicker
       @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
-      mode="step-through"
+      layout="step-through"
     />
     <hr />
-    <h2>As Form</h2>
+    <h2>Step-Through Drodpdown B.</h2>
+    <h3>W/ city count rendered in dropdown</h3>
+    <CityPicker
+      @citiesSelected="$val => (selectedCitiesCountC = $val.length)"
+      layout="step-through"
+      mode="multiple"
+    />
+    <hr />
+    <h2>Form Layout</h2>
     <h3>
       {{ selectedCitiesCountA }}
       {{ selectedCitiesCountA === 1 ? "city" : "cities" }} selected
@@ -37,6 +45,7 @@ export default defineComponent({
     return {
       selectedCitiesCountA: 0,
       selectedCitiesCountB: 0,
+      selectedCitiesCountC: 0,
     };
   },
 });
@@ -61,11 +70,11 @@ $yellow: #c09853;
 $color-text: rgb(31, 31, 31);
 
 html {
-  background-color:white;
+  background-color: white;
 }
 
 body {
-  max-width: 800px;
+  max-width: 930px;
   margin: auto;
   padding: 2rem;
   height: 100%;
@@ -74,11 +83,14 @@ body {
   * {
     font-family: inherit;
   }
-  background-color: #f7f7f7;
+  background-color: #f5faff;
   --ms-max-height: 50vh;
   --ms-placeholder-color: $color-text;
+  --ms-tag-bg: #3a87ad;
+  --ms-option-bg-selected: #3a87ad;
+  --ms-option-bg-selected-pointed: #51a9d4;
   @include tablet-up {
-    padding: 4rem 2rem 6rem;
+    padding: 4rem 4rem 6rem;
     --ms-max-height: calc(100vh - 500px);
   }
 }
@@ -94,7 +106,7 @@ h3 {
   margin-bottom: 2rem;
 }
 h1 {
-  font-size:45px;
+  font-size: 45px;
 }
 h2 {
   font-size: 35px;

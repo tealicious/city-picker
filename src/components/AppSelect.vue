@@ -12,7 +12,7 @@
       :id="name"
       v-model="internalValue"
       :disabled="disabled"
-      mode="tags"
+      :mode="mode"
       noResultsText="You picked 'em all!"
       :placeholder="message"
       :canClear="false"
@@ -20,7 +20,13 @@
       :searchable="true"
       :createTag="true"
       :options="options"
-    />
+    >
+      <template v-slot:multiplelabel="{ values }">
+        <div class="multiselect-multiple-label">
+          {{ values.length }} {{ multiSelectedOptionLabel }} selected
+        </div>
+      </template>
+    </Multiselect>
     <select v-else v-model="internalValue" :name="name" :id="name" :disabled="disabled">
       <option disabled selected value="">{{ message }}</option>
       <option v-for="(option, i) in options" :key="i" :value="option">
@@ -60,6 +66,10 @@ export default defineComponent({
       type: String,
       default: 'Please Choose an Option',
     },
+    multiSelectedOptionLabel: {
+      type: String,
+      default: 'options',
+    },
     disabled: {
       type: Boolean,
       default: false,
@@ -67,6 +77,9 @@ export default defineComponent({
     multi: {
       type: Boolean,
       default: false,
+    },
+    mode: {
+      type: String,
     },
   },
   computed: {
