@@ -1,6 +1,28 @@
 <template>
-  <div class="city-picker-module flex-wrapper" :class="`layout-${layout}`">
-    <h3 class="count">
+  <div
+    v-if="fetchError"
+    class="city-picker-module flex-wrapper"
+    :class="`layout-${layout}`"
+    style="display:block;"
+  >
+    Please check your .env file and make sure it has the appropriate values for
+    user email and api token generated @
+    <a
+      href="https://www.universal-tutorial.com/rest-apis/free-rest-api-for-country-state-city"
+      target="_blank"
+      >universal-tutorial.com</a
+    >
+  </div>
+  <form
+    autocomplete="off"
+    class="city-picker-module flex-wrapper"
+    :class="`layout-${layout}`"
+    v-else
+  >
+    <!-- this form will never be submitted,
+    but we need autocomplete off for the combobox multiselect input with search activated,
+    or else Chrome can mess up UX there. -->
+    <h3 class="count" v-if="mode !== 'multiple'">
       {{ cityCount }}
       {{ cityCount === 1 ? "city" : "cities" }} selected
     </h3>
@@ -97,7 +119,7 @@
 
     <div class="flex-wrapper button-wrapper">
       <button
-        @click="selectAllCities"
+        @click.prevent="selectAllCities"
         :disabled="
           !cityOptions.length ||
           cityOptions.length === cityCount ||
@@ -108,16 +130,20 @@
       </button>
       <button
         class="clear"
-        @click="clearAllCities"
+        @click.prevent="clearAllCities"
         :disabled="!cityOptions.length || cityCount === 0 || !selectedState"
       >
         Clear All Cities
       </button>
-      <button @click="reset" class="reset" :disabled="!stateOptions.length">
+      <button
+        @click.prevent="reset"
+        class="reset"
+        :disabled="!stateOptions.length"
+      >
         Reset All Options
       </button>
     </div>
-  </div>
+  </form>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
@@ -153,7 +179,7 @@ export default defineComponent({
   },
   data() {
     return {
-      globalError: false,
+      fetchError: false,
       fetchingCountries: true,
       countryOptions: [] as string[],
       selectedCountry: '',
@@ -166,7 +192,7 @@ export default defineComponent({
       stepThroughMode: this.layout === 'step-through',
       countryPickerID: `${uuidv4()}_country_picker`,
       statePickerID: `${uuidv4()}_state_picker`,
-      cityPickerID: `${uuidv4()}_city_picker`,
+      cityPickerID: `${uuidv4()}_picker`,
     };
   },
   watch: {
@@ -213,7 +239,7 @@ export default defineComponent({
     async fetchCountryOptions(): Promise<void> {
       const countries = await getCountries;
       if ((countries as ErrorObj).isError) {
-        this.globalError = true;
+        this.fetchError = true;
         return;
       }
       this.countryOptions = countryOptionsFactory(countries as Country[]);
@@ -298,8 +324,8 @@ export default defineComponent({
 <style lang="scss">
 $color-disabled: rgb(170, 170, 170);
 $red: #d2322d;
-$blue: #3a87ad;
-$yellow: #c09853;
+$blue: #34799b;
+$yellow: #8a6e3c;
 
 @mixin tablet-up {
   @media (min-width: 769px) {
@@ -352,26 +378,30 @@ $yellow: #c09853;
 }
 
 button {
-  padding: 0.5em 2em;
-  text-transform: uppercase;
+  padding: 0.5em 2.25em;
   color: white;
   background-color: $blue;
-  font-size: 18px;
   border: none;
+  border: 1px solid rgba(0, 0, 0, 0);
   cursor: pointer;
-  font-weight: bold;
   margin: 2rem 1rem 0;
+  font-size: inherit;
   &:hover,
   &:active,
   &:focus {
-    background-color: lighten($blue, 20%);
+    text-decoration: underline;
+  }
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: darken($blue, 20%);
   }
   &.clear {
     background-color: $yellow;
     &:hover,
     &:active,
     &:focus {
-      background-color: lighten($yellow, 20%);
+      background-color: darken($yellow, 20%);
     }
   }
   &.reset {
@@ -379,7 +409,7 @@ button {
     &:hover,
     &:active,
     &:focus {
-      background-color: lighten($red, 20%);
+      background-color: darken($red, 20%);
     }
   }
   &:disabled {
@@ -391,6 +421,7 @@ button {
     &:active,
     &:focus {
       background-color: var(--ms-bg-disabled, #f3f4f6);
+      text-decoration: none;
     }
   }
 }
@@ -419,7 +450,7 @@ button {
 }
 
 .back-step {
-  color: $yellow;
+  color: $blue;
   margin-right: 0.66rem;
   text-decoration: none;
   &:hover,

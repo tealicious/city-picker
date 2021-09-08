@@ -1,5 +1,7 @@
 # city-picker
 
+[Demo](https://tealicious.github.io/city-picker-dist/)
+
 ## Project setup
 - bring node up to date (>= v. 14)
 - get an api token from https://www.universal-tutorial.com/rest-apis/free-rest-api-for-country-state-city

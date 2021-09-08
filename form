@@ -1,0 +1,33 @@
+
+> city-picker@0.1.0 test:unit
+> vue-cli-service test:unit
+
+ WEBPACK  Compiling...
+
+ DONE  Compiled successfully in 1923ms
+
+ WEBPACK  Compiled successfully in 1923ms
+
+ MOCHA  Testing...
+
+
+
+  AppSelect.vue
+    ✓ should render correctly
+    ✓ renders props.message when passed
+    ✓ provides options for the select input when props.options are passed
+    1) should change the component's current state when a user makes a selection
+
+
+  3 passing (93ms)
+  1 failing
+
+  1) AppSelect.vue
+       should change the component's current state when a user makes a selection:
+     AssertionError: current state equals user selection
+      at Context.<anonymous> (dist/js/webpack:/tests/unit/AppSelect.spec.ts:50:1)
+
+
+
+ MOCHA  Tests completed with 1 failure(s)
+

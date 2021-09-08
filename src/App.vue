@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!globalError">
+  <div>
     <h1>City Picker</h1>
     <p class="intro">
       Select a country and a state to start picking cities!
@@ -9,6 +9,14 @@
     <CityPicker
       @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
       layout="step-through"
+    />
+    <hr />
+    <h2>Step-Through Layout</h2>
+    <h3>w/ inline city count</h3>
+    <CityPicker
+      @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
+      layout="step-through"
+      mode="multiple"
     />
     <hr />
     <h2>Form Layout</h2>
@@ -37,8 +45,8 @@ export default defineComponent({
 <style lang="scss">
 $color-disabled: rgb(170, 170, 170);
 $red: #d2322d;
-$blue: #3a87ad;
-$yellow: #c09853;
+$blue: #34799b;
+$yellow: #8a6e3c;
 @mixin tablet-up {
   @media (min-width: 769px) {
     @content;
@@ -65,7 +73,7 @@ body {
   }
   background-color: white;
   --ms-max-height: 50vh;
-  --ms-placeholder-color: $color-text;
+  --ms-placeholder-color: rgb(170, 170, 170);
   --ms-tag-bg: #3a87ad;
   --ms-option-bg-selected: #3a87ad;
   --ms-option-bg-selected-pointed: #51a9d4;
@@ -97,6 +105,7 @@ h3 {
   font-size: 27.5px;
 }
 .intro {
+  color:$yellow;
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 2rem;

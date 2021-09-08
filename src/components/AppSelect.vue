@@ -27,10 +27,20 @@
         </div>
       </template>
     </Multiselect>
-    <select v-else v-model="internalValue" :name="name" :id="name" :disabled="disabled">
+    <select
+      v-else
+      v-model="internalValue"
+      :name="name"
+      :id="name"
+      :disabled="disabled"
+    >
       <option disabled selected value="">{{ message }}</option>
-      <option v-for="(option, i) in options" :key="i" :value="option">
-        {{ option }}
+      <option
+        v-for="(option, i) in options"
+        :key="i"
+        :value="option.value ? option.value : option"
+      >
+        {{ option.label ? option.label : option }}
       </option>
     </select>
   </div>
@@ -56,11 +66,9 @@ export default defineComponent({
     },
     name: {
       type: String,
-      required: false,
     },
     label: {
       type: String,
-      required: false,
     },
     message: {
       type: String,
@@ -101,18 +109,18 @@ export default defineComponent({
 <style lang="scss">
 $color-disabled: rgb(170, 170, 170);
 $red: #d2322d;
-$blue: #3a87ad;
-$yellow: #c09853;
+$blue: #34799b;
+$yellow: #8a6e3c;
 
 .input-group {
   &.fetching {
     label {
-      color: #468847;
+      color: #417f42;
     }
   }
   &.has-options {
     label {
-      color: $blue;
+      color: $yellow;
     }
   }
   &.has-no-options {
@@ -124,6 +132,7 @@ $yellow: #c09853;
     display: inline-block;
     font-weight: bold;
     padding-bottom: 0.5rem;
+    font-size: 18px;
   }
   select {
     border: 1px solid #cecece;
