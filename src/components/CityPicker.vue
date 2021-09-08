@@ -1,11 +1,15 @@
 <template>
-  <div class="flex-wrapper" :class="`layout-${layout}`">
+  <div class="city-picker-module flex-wrapper" :class="`layout-${layout}`">
+    <h3 class="count">
+      {{ cityCount }}
+      {{ cityCount === 1 ? "city" : "cities" }} selected
+    </h3>
     <app-select
       v-if="!stepThroughMode || !selectedCountry"
       class="country-picker"
       :class="[
         { fetching: fetchingCountries },
-        { 'has-options': !fetchingCountries && countryOptions.length > 0 }
+        { 'has-options': !fetchingCountries && countryOptions.length > 0 },
       ]"
       :options="countryOptions"
       v-model="selectedCountry"
@@ -13,7 +17,8 @@
       :name="countryPickerID"
     >
       <template v-slot:label>
-        {{ countrySelectLabel }}<app-typer v-if="fetchingCountries">...</app-typer>
+        {{ countrySelectLabel
+        }}<app-typer v-if="fetchingCountries">...</app-typer>
       </template>
     </app-select>
 
@@ -24,8 +29,9 @@
         { fetching: fetchingStates },
         { 'has-options': !fetchingStates && stateOptions.length > 0 },
         {
-          'has-no-options': selectedCountry && !fetchingStates && !stateOptions.length
-        }
+          'has-no-options':
+            selectedCountry && !fetchingStates && !stateOptions.length,
+        },
       ]"
       :options="stateOptions"
       v-model="selectedState"
@@ -52,15 +58,16 @@
         { fetching: fetchingCities },
         { 'has-options': !fetchingCities && cityOptions.length > 0 },
         {
-          'has-no-options': selectedState && !fetchingCities && !cityOptions.length
-        }
+          'has-no-options':
+            selectedState && !fetchingCities && !cityOptions.length,
+        },
       ]"
       :options="cityOptions"
       v-model="selectedCities"
       :disabled="!allowCitySelect"
       :name="cityPickerID"
       :message="citySelectMessage"
-      :multiSelectedOptionLabel="selectedCities.length === 1 ? 'city' : 'cities'"
+      :multiSelectedOptionLabel="cityCount === 1 ? 'city' : 'cities'"
       multi
       :mode="mode"
     >
@@ -91,14 +98,18 @@
     <div class="flex-wrapper button-wrapper">
       <button
         @click="selectAllCities"
-        :disabled="!cityOptions.length || cityOptions.length === selectedCities.length"
+        :disabled="
+          !cityOptions.length ||
+          cityOptions.length === cityCount ||
+          !selectedState
+        "
       >
         Select All Cities
       </button>
       <button
         class="clear"
         @click="clearAllCities"
-        :disabled="!cityOptions.length || selectedCities.length === 0"
+        :disabled="!cityOptions.length || cityCount === 0 || !selectedState"
       >
         Clear All Cities
       </button>
@@ -116,7 +127,10 @@ import AppTyper from '@/components/AppTyper.vue';
 import { getCountries, getStates, getCities } from '@/ts/services';
 
 import {
-  countryOptionsFactory, stateOptionsFactory, cityOptionsFactory, uuidv4,
+  countryOptionsFactory,
+  stateOptionsFactory,
+  cityOptionsFactory,
+  uuidv4,
 } from '@/ts/utils';
 
 import { Option, ErrorObj, Country } from '@/types';
@@ -175,7 +189,9 @@ export default defineComponent({
       this.selectedCities = [];
     },
     selectAllCities(): void {
-      this.selectedCities = this.cityOptions.map((cityOption) => cityOption.value);
+      this.selectedCities = this.cityOptions.map(
+        (cityOption) => cityOption.value,
+      );
     },
     reset(): void {
       this.selectedCountry = '';
@@ -220,6 +236,9 @@ export default defineComponent({
     },
   },
   computed: {
+    cityCount(): number {
+      return this.selectedCities.length;
+    },
     allowCountrySelect(): boolean {
       return this.countryOptions.length > 0;
     },
@@ -288,6 +307,14 @@ $yellow: #c09853;
   }
 }
 
+.city-picker-module {
+  @include tablet-up {
+    padding: 2.5rem 2rem;
+    background-color: var(--ms-bg-disabled);
+    box-shadow: 12px 12px 12px 0px rgb(0 0 0 / 12%);
+  }
+}
+
 .flex-wrapper {
   display: flex;
   flex-flow: row wrap;
@@ -295,9 +322,16 @@ $yellow: #c09853;
   justify-content: center;
 }
 
+.count,
 .input-group {
   flex: 0 1 100%;
   max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.input-group {
+  margin-bottom: 2rem;
   &.city-picker {
     margin: 0;
   }

@@ -105,9 +105,6 @@ $blue: #3a87ad;
 $yellow: #c09853;
 
 .input-group {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin-bottom: 2rem;
   &.fetching {
     label {
       color: #468847;

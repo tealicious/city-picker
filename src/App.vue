@@ -5,29 +5,13 @@
       Select a country and a state to start picking cities!
     </p>
     <hr />
-    <h2>Step-Through Drodpdown A.</h2>
-    <h3>
-      {{ selectedCitiesCountB }}
-      {{ selectedCitiesCountB === 1 ? "city" : "cities" }} selected
-    </h3>
+    <h2>Step-Through Layout</h2>
     <CityPicker
       @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
       layout="step-through"
     />
     <hr />
-    <h2>Step-Through Drodpdown B.</h2>
-    <h3>W/ city count rendered in dropdown</h3>
-    <CityPicker
-      @citiesSelected="$val => (selectedCitiesCountC = $val.length)"
-      layout="step-through"
-      mode="multiple"
-    />
-    <hr />
     <h2>Form Layout</h2>
-    <h3>
-      {{ selectedCitiesCountA }}
-      {{ selectedCitiesCountA === 1 ? "city" : "cities" }} selected
-    </h3>
     <CityPicker @citiesSelected="$val => (selectedCitiesCountA = $val.length)" />
   </div>
 </template>
@@ -69,34 +53,32 @@ $yellow: #c09853;
 
 $color-text: rgb(31, 31, 31);
 
-html {
-  background-color: white;
-}
-
 body {
-  max-width: 930px;
+  max-width: 65rem;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   height: 100%;
   font-family: "Roboto Mono", monospace;
   color: $color-text;
   * {
     font-family: inherit;
   }
-  background-color: #f5faff;
+  background-color: white;
   --ms-max-height: 50vh;
   --ms-placeholder-color: $color-text;
   --ms-tag-bg: #3a87ad;
   --ms-option-bg-selected: #3a87ad;
   --ms-option-bg-selected-pointed: #51a9d4;
+  --ms-bg-disabled: #f5faff;
   @include tablet-up {
-    padding: 4rem 4rem 6rem;
-    --ms-max-height: calc(100vh - 500px);
+    padding: 4.5rem 6rem 6rem;
+    --ms-max-height: calc(100vh - 600px);
   }
 }
 
 hr {
-  margin: 3rem 0;
+  margin: 2rem 0;
+  opacity :0;
 }
 
 h1,
@@ -112,7 +94,7 @@ h2 {
   font-size: 35px;
 }
 h3 {
-  font-size: 30px;
+  font-size: 27.5px;
 }
 .intro {
   font-size: 18px;
