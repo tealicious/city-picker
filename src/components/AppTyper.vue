@@ -8,8 +8,8 @@ export default defineComponent({
   name: 'Typer',
   mounted() {
     let i = 0;
-    const text = this.$el.innerHTML;
     if (!this.$el || !this.$el.innerHTML) return;
+    const text = this.$el.innerHTML;
     this.$el.innerHTML = '';
     const speed = 150;
 
