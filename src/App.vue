@@ -14,7 +14,7 @@
     <h2>Step-Through Layout</h2>
     <h3>w/ inline city count</h3>
     <CityPicker
-      @citiesSelected="$val => (selectedCitiesCountB = $val.length)"
+      @citiesSelected="$val => (selectedCitiesCountC = $val.length)"
       layout="step-through"
       mode="multiple"
     />
